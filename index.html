@@ -10,6 +10,11 @@
             text-align: center;
             padding: 20px;
             background-color: #f4f4f9;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background-color: #2f2f2f;
+            color: white;
         }
         .container {
             max-width: 700px;
@@ -18,6 +23,10 @@
             background: #fff;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+        body.dark-mode .container {
+            background: #3a3a3a;
         }
         input, select, button {
             margin: 10px 0;
@@ -71,24 +80,57 @@
                 box-shadow: 0 0 10px rgba(255, 0, 150, 0.6);
             }
         }
+        .mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #333;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 24px;
+            transition: background-color 0.3s;
+        }
+        .mode-toggle:hover {
+            background-color: #555;
+        }
+        body.dark-mode .mode-toggle {
+            background-color: #f39c12;
+        }
     </style>
 </head>
 <body>
+    <!-- Dark Mode Toggle Button -->
+    <button class="mode-toggle" id="modeToggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+    </button>
+
     <div class="container">
-        <h1>ads free Fastest and Secure Image Compressor and Converter</h1>
-        <p>This tool compresses your image to match the specified size as closely as possible. You can convert the image to JPG, PNG, or WEBP format and download the processed result.</p>
+        <h1>Ads Free Fastest and Secure Image Compressor and Converter</h1>
+        <p>This tool resizes and compresses your image with minimal quality loss. You can convert the image to JPG, PNG, WEBP, GIF, BMP formats and download the processed result.</p>
         
-        <input type="file" id="uploadImage" accept="image/*">
+        <input type="file" id="uploadImage" accept="image/*" onchange="handleImageUpload()">
         
+        <h3>Preview of Image:</h3>
+        <img id="imagePreview" alt="Image Preview" style="display: none;">
+
         <label for="format">Select Format:</label>
         <select id="format">
             <option value="jpeg">JPG</option>
             <option value="png">PNG</option>
             <option value="webp">WEBP</option>
+            <option value="gif">GIF</option>
+            <option value="bmp">BMP</option>
         </select>
         
         <label for="size">Image Size:</label>
-        <input type="number" id="size" placeholder="Size (e.g., 100)">
+        <input type="number" id="size" placeholder="Size (e.g., 100)" min="1">
         
         <label for="unit">Size Unit:</label>
         <select id="unit">
@@ -108,7 +150,67 @@
         <a href="https://www.instagram.com/sandeep_yadav_._._" target="_blank" class="instagram-button">Follow Me on Instagram</a>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
     <script>
+        // Toggle dark mode
+        function toggleDarkMode() {
+            const body = document.body;
+            const modeToggleButton = document.getElementById("modeToggle");
+
+            body.classList.toggle("dark-mode");
+
+            const isDarkMode = body.classList.contains("dark-mode");
+            modeToggleButton.innerHTML = isDarkMode
+                ? '<i class="fas fa-sun"></i>'  // Sun icon for dark mode
+                : '<i class="fas fa-moon"></i>'; // Moon icon for light mode
+        }
+
+        function handleImageUpload() {
+            const fileInput = document.getElementById("uploadImage");
+            const imagePreview = document.getElementById("imagePreview");
+
+            if (fileInput.files.length === 0) {
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+                const img = new Image();
+                img.src = event.target.result;
+
+                img.onload = function () {
+                    // Resize to 1.2 MP while maintaining the aspect ratio
+                    const maxPixels = 1200000; // 1.2 MP
+                    const aspectRatio = img.width / img.height;
+
+                    let targetWidth = Math.sqrt(maxPixels * aspectRatio);
+                    let targetHeight = maxPixels / targetWidth;
+
+                    // Round the dimensions
+                    targetWidth = Math.round(targetWidth);
+                    targetHeight = Math.round(targetHeight);
+
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+
+                    // Draw the resized image onto the canvas
+                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                    // Set the preview image source
+                    const resizedDataUrl = canvas.toDataURL();
+                    imagePreview.src = resizedDataUrl;
+                    imagePreview.style.display = "block";
+                };
+            };
+
+            reader.readAsDataURL(file);
+        }
+
         function convertAndCompress() {
             const fileInput = document.getElementById("uploadImage");
             const format = document.getElementById("format").value;
@@ -132,23 +234,37 @@
                     const canvas = document.createElement("canvas");
                     const ctx = canvas.getContext("2d");
 
-                    canvas.width = img.width;
-                    canvas.height = img.height;
+                    // Resize the image to 1.2MP while maintaining the aspect ratio
+                    const maxPixels = 1200000; // 1.2 MP
+                    const aspectRatio = img.width / img.height;
 
+                    let targetWidth = Math.sqrt(maxPixels * aspectRatio);
+                    let targetHeight = maxPixels / targetWidth;
+
+                    // Round the dimensions
+                    targetWidth = Math.round(targetWidth);
+                    targetHeight = Math.round(targetHeight);
+
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+
+                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                    // Start compression
                     let quality = 1.0;
                     let dataUrl;
                     let compressedSizeInKB;
 
                     do {
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0, img.width, img.height);
+                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
                         dataUrl = canvas.toDataURL(`image/${format}`, quality);
 
                         const base64Length = dataUrl.length - (dataUrl.indexOf(",") + 1);
                         compressedSizeInKB = (base64Length * (3 / 4)) / 1024;
 
-                        quality -= 0.05;
+                        quality -= 0.05; // Decrease quality slightly for each iteration
                     } while (compressedSizeInKB > targetSizeInKB && quality > 0);
 
                     const processedImage = document.getElementById("processedImage");
