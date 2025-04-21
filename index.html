@@ -1,184 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Image Converter & Compressor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            text-align: center;
-            padding: 20px;
-            background-color: #f4f4f9;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        body.dark-mode {
-            background-color: #121212;
-            color: #ffffff;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            padding: 30px;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        body.dark-mode .container {
-            background: #1e1e1e;
-        }
-        input, select, button {
-            margin: 10px 0;
-            padding: 12px;
-            width: 100%;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        img {
-            margin-top: 20px;
-            max-width: 100%;
-            border-radius: 10px;
-        }
-        .output {
-            margin-top: 20px;
-        }
-        .mode-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: none;
-            font-size: 22px;
-            color: white;
-            background-color: #333;
-            cursor: pointer;
-        }
-        body.dark-mode .mode-toggle {
-            background-color: #f39c12;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Converter & Compressor</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <style>
+    :root {
+      --primary: #4a90e2;
+      --accent: #50e3c2;
+      --bg-light: #f9faff;
+      --bg-dark: #1f1f2e;
+      --text-light: #333;
+      --text-dark: #eee;
+      --transition: 0.4s ease;
+    }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-light);
+      transition: background var(--transition), color var(--transition);
+    }
+    body.dark-mode {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    .container {
+      max-width:700px;
+      margin:50px auto;
+      padding:30px;
+      background: white;
+      border-radius:16px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.1);
+      transition: background var(--transition);
+    }
+    body.dark-mode .container { background: #2a2a3b; }
+    h1 {
+      text-align:center;
+      font-size:2rem;
+      margin-bottom:20px;
+      animation: fadeIn 1s;
+    }
+    p { text-align:center; margin-bottom:20px; }
+    .controls { display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px; }
+    .controls input,
+    .controls select { width:100%; padding:12px; border:1px solid #ccc; border-radius:8px; transition:border var(--transition); }
+    .controls input:focus,
+    .controls select:focus { border-color: var(--primary); }
+    .buttons { display:flex; gap:15px; justify-content:center; flex-wrap:wrap; }
+    .buttons button {
+      padding:12px 20px;
+      border:none;
+      border-radius:8px;
+      background: var(--primary);
+      color:#fff;
+      cursor:pointer;
+      font-size:1rem;
+      transition: background var(--transition), transform 0.2s;
+      position:relative;
+      overflow:hidden;
+    }
+    .buttons button:hover { background: var(--accent); transform: translateY(-2px); }
+    .buttons button:active { transform: translateY(0); }
+    #imagePreview {
+      display:block;
+      max-width:100%;
+      margin:20px auto;
+      border-radius:12px;
+      opacity:0;
+      animation: fadeInUp 0.8s forwards;
+    }
+    .output { text-align:center; margin-top:20px; animation: fadeIn 0.8s; }
+    .output img { border-radius:12px; max-width:100%; }
+    .download-link { display:inline-block; margin-top:10px; color:var(--primary); text-decoration:none; font-weight:600; }
+    .mode-toggle {
+      position:fixed; top:20px; right:20px;
+      width:50px; height:50px; border:none;
+      border-radius:50%; background:var(--primary);
+      color:#fff; font-size:1.2rem; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition: background var(--transition);
+    }
+    .mode-toggle:hover { background: var(--accent); }
+    @keyframes fadeIn { from { opacity:0;} to { opacity:1;} }
+    @keyframes fadeInUp { from { opacity:0; transform: translateY(20px);} to { opacity:1; transform: translateY(0);} }
+  </style>
 </head>
 <body>
-    <button class="mode-toggle" onclick="toggleDarkMode()">&#9788;</button>
-    <div class="container">
-        <h1>Image Converter & Compressor</h1>
-        <input type="file" id="uploadImage" accept="image/*" onchange="previewImage()">
-        <img id="preview" style="display:none">
+  <button class="mode-toggle" onclick="toggleDarkMode()">☀️</button>
+  <div class="container">
+    <h1>Image Converter & Compressor</h1>
+    <p>Resize, compress & convert your images with delightful animations.</p>
 
-        <label>Custom Width (px):</label>
-        <input type="number" id="customWidth">
-        <label>Custom Height (px):</label>
-        <input type="number" id="customHeight">
-
-        <label>Select Format:</label>
-        <select id="format">
-            <option value="jpeg">JPG</option>
-            <option value="png">PNG</option>
-            <option value="webp">WEBP</option>
-            <option value="gif">GIF</option>
-            <option value="bmp">BMP</option>
-        </select>
-
-        <label>Target Size:</label>
-        <input type="number" id="targetSize" placeholder="e.g., 300">
-        <select id="unit">
-            <option value="KB">KB</option>
-            <option value="MB">MB</option>
-        </select>
-
-        <button onclick="processImage()">Convert & Compress</button>
-        <button onclick="convertToPDF()">Download as PDF</button>
-
-        <div class="output" id="output" style="display:none">
-            <h2>Processed Image:</h2>
-            <img id="resultImage">
-            <p><strong>Size:</strong> <span id="finalSize"></span></p>
-            <a id="downloadLink" download style="display:none">Download Image</a>
-        </div>
+    <input type="file" id="uploadImage" accept="image/*" style="display:none" onchange="handleImageUpload()">
+    <div class="buttons">
+      <button onclick="document.getElementById('uploadImage').click()">Upload Image</button>
+      <button onclick="downloadImage()">Download Image</button>
+      <button onclick="downloadAsPDF()">Download PDF</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
+    <div class="controls">
+      <input type="number" id="customWidth" placeholder="Custom Width (px)">
+      <input type="number" id="customHeight" placeholder="Custom Height (px)">
+      <select id="format">
+        <option value="jpeg">JPG</option>
+        <option value="png">PNG</option>
+        <option value="webp">WEBP</option>
+        <option value="gif">GIF</option>
+        <option value="bmp">BMP</option>
+      </select>
+      <input type="number" id="size" placeholder="Max Size (KB)" min="1">
+    </div>
+
+    <img id="imagePreview" alt="Preview">
+
+    <div class="output" id="output" style="display:none;">
+      <img id="processedImage" alt="Processed">
+      <p><strong>Final Size:</strong> <span id="imageSize"></span> KB</p>
+      <a id="downloadLink" class="download-link">Download Converted</a>
+    </div>
+  </div>
+
+  <script>
+    let currentDataUrl;
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      const btn = document.querySelector('.mode-toggle');
+      btn.textContent = document.body.classList.contains('dark-mode') ? '🌙' : '☀️';
+    }
+
+    function handleImageUpload() {
+      const file = document.getElementById('uploadImage').files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          // resize logic: 1.2MP aspect ratio
+          const maxPixels = 1200000;
+          const ar = img.width/img.height;
+          let w = Math.round(Math.sqrt(maxPixels*ar));
+          let h = Math.round(maxPixels/w);
+          // apply custom dims
+          const cw = parseInt(document.getElementById('customWidth').value);
+          const ch = parseInt(document.getElementById('customHeight').value);
+          if (!isNaN(cw)&&cw>0) w = cw;
+          if (!isNaN(ch)&&ch>0) h = ch;
+
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img,0,0,w,h);
+          currentDataUrl = canvas.toDataURL();
+          document.getElementById('imagePreview').src = currentDataUrl;
+          document.getElementById('imagePreview').style.display = 'block';
         }
+      };
+      reader.readAsDataURL(file);
+    }
 
-        function previewImage() {
-            const file = document.getElementById('uploadImage').files[0];
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const preview = document.getElementById('preview');
-                preview.src = e.target.result;
-                preview.style.display = 'block';
-            }
-            reader.readAsDataURL(file);
+    function convertAndCompress() {
+      // kept old compression logic
+      const fileInput = document.getElementById('uploadImage');
+      if (!fileInput.files.length) return alert('Please upload an image.');
+      const format = document.getElementById('format').value;
+      const maxKB = parseInt(document.getElementById('size').value)||Infinity;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image(); img.src = e.target.result;
+        img.onload = () => {
+          const maxPixels = 1200000;
+          const ar = img.width/img.height;
+          let w = Math.round(Math.sqrt(maxPixels*ar));
+          let h = Math.round(maxPixels/w);
+          const cw = parseInt(document.getElementById('customWidth').value);
+          const ch = parseInt(document.getElementById('customHeight').value);
+          if (!isNaN(cw)&&cw>0) w = cw;
+          if (!isNaN(ch)&&ch>0) h = ch;
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width=w; canvas.height=h;
+          let quality=1.0, dataUrl, sizeKB;
+          do {
+            ctx.clearRect(0,0,w,h);
+            ctx.drawImage(img,0,0,w,h);
+            dataUrl = canvas.toDataURL('image/'+format, quality);
+            sizeKB = ((dataUrl.length - (dataUrl.indexOf(',')+1))*3/4)/1024;
+            quality -= 0.05;
+          } while (sizeKB>maxKB && quality>0);
+          // output
+          document.getElementById('processedImage').src = dataUrl;
+          document.getElementById('imageSize').textContent = sizeKB.toFixed(2);
+          const dl = document.getElementById('downloadLink');
+          dl.href = dataUrl; dl.download = 'converted.'+format;
+          document.getElementById('output').style.display = 'block';
         }
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    }
 
-        function processImage() {
-            const file = document.getElementById('uploadImage').files[0];
-            if (!file) return alert('Please select an image');
+    function downloadImage() {
+      if (!currentDataUrl) return alert('No image to download');
+      convertAndCompress();
+    }
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const img = new Image();
-                img.src = e.target.result;
+    async function downloadAsPDF() {
+      await convertAndCompress();
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      const img = document.getElementById('processedImage');
+      if (!img.src) return;
+      const props = pdf.getImageProperties(img.src);
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (props.height*pdfW)/props.width;
+      pdf.addImage(img.src,'JPEG',0,0,pdfW,pdfH);
+      pdf.save('image.pdf');
+    }
 
-                img.onload = function () {
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-
-                    const width = document.getElementById('customWidth').value || img.width;
-                    const height = document.getElementById('customHeight').value || img.height;
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const format = document.getElementById('format').value;
-                    let quality = 1.0;
-                    let dataUrl;
-                    let sizeLimit = document.getElementById('targetSize').value;
-                    const unit = document.getElementById('unit').value;
-                    const maxKB = unit === 'MB' ? sizeLimit * 1024 : sizeLimit;
-
-                    do {
-                        dataUrl = canvas.toDataURL('image/' + format, quality);
-                        const base64Length = dataUrl.length - dataUrl.indexOf(',') - 1;
-                        const sizeKB = (base64Length * 3 / 4) / 1024;
-                        if (sizeKB <= maxKB) break;
-                        quality -= 0.05;
-                    } while (quality > 0);
-
-                    document.getElementById('resultImage').src = dataUrl;
-                    document.getElementById('output').style.display = 'block';
-                    document.getElementById('finalSize').textContent = ((dataUrl.length * 3 / 4) / 1024).toFixed(2) + ' KB';
-                    const link = document.getElementById('downloadLink');
-                    link.href = dataUrl;
-                    link.style.display = 'inline';
-                    link.textContent = 'Download Image';
-                }
-            }
-            reader.readAsDataURL(file);
-        }
-
-        function convertToPDF() {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF();
-            const imgData = document.getElementById('resultImage').src;
-            pdf.addImage(imgData, 'JPEG', 10, 10, 180, 160);
-            pdf.save('image.pdf');
-        }
-    </script>
+    // bind preview click to compress & convert
+    document.getElementById('imagePreview').addEventListener('click',convertAndCompress);
+  </script>
 </body>
 </html>
