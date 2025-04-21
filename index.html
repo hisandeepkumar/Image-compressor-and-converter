@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Image Converter & Compressor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        body.dark-mode {
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+            color: #ecf0f1;
+        }
+        .container {
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s;
+        }
+        body.dark-mode .container {
+            background: rgba(44, 62, 80, 0.95);
+        }
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            color: #2d3436;
+        }
+        body.dark-mode h1 {
+            color: #dfe6e9;
+        }
+        p {
+            color: #636e72;
+            margin-bottom: 20px;
+        }
+        body.dark-mode p {
+            color: #b2bec3;
+        }
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .water ~
+
+System: mark-section {
+            margin-top: 20px;
+        }
+        input, select, button, textarea {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+        input, select, textarea {
+            background: #f1f2f6;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+            background: #34495e;
+            color: #ecf0f1;
+        }
+        button {
+            background: #0984e3;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #0652dd;
+            transform: translateY(-2px);
+        }
+        .drop-zone {
+            border: 2px dashed #0984e3;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background: #f1f2f6;
+        }
+        body.dark-mode .drop-zone {
+            background: #34495e;
+            border-color: #e67e22;
+        }
+        .drop-zone.dragover {
+            background: #dfe6e9;
+        }
+        .preview-section, .output-section {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2d3436;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #fff;
+            font-size: 24px;
+            transition: background 0.3s;
+        }
+        body.dark-mode .mode-toggle {
+            background: #e67e22;
+        }
+        .mode-toggle:hover {
+            background: #636e72;
+        }
+        .instagram-button {
+            display: inline-block;
+            background: linear-gradient(45deg SAML Response: , #f093fb, #f5576c, #4a00e0);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            animation: pulse 2s infinite;
+        }
+        .instagram-button:hover {
+            transform: scale(1.05);
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px rgba(245, 87, 108, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(245, 87, 108, 0.8); }
+            100% { box-shadow: 0 0 10px rgba(245, 87, 108, 0.5); }
+        }
+        .download-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .download-options a, .download-options button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        .quality-slider {
+            margin: 20px 0;
+        }
+        .quality-slider input[type="range"] {
+            width: 100%;
+        }
+        .watermark-section textarea {
+            width: 100%;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <button class="mode-toggle" id="modeToggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div class="container">
+        <h1>Ultimate Image Converter & Compressor</h1>
+        <p>Resize, compress, convert, and watermark multiple images to JPG, PNG, WEBP, GIF, BMP, or PDF with custom settings.</p>
+
+        <div class="drop-zone" id="dropZone">
+            <p>Drag & Drop Images Here or Click to Upload</p>
+            <input type="file" id="uploadImage" accept="image/*" multiple style="display: none;" onchange="handleImageUpload(event)">
+        </div>
+
+        <div class="input-group">
+            <select id="format">
+                <option value="jpeg">JPG</option>
+                <option value="png">PNG</option>
+                <option value="webp">WEBP</option>
+                <option value="gif">GIF</option>
+                <option value="bmp">BMP</option>
+            </select>
+            <input type="number" id="width" placeholder="Width (px)" min="1">
+            <input type="number" id="height" placeholder="Height (px)" min="1">
+            <input type="number" id="size" placeholder="Target Size" min="1">
+            <select id="unit">
+                <option value="KB">KB</option>
+                <option value="MB">MB</option>
+            </select>
+        </div>
+
+        <div class="quality-slider">
+            <label for="quality">Compression Quality: <span id="qualityValue">100</span>%</label>
+            <input type="range" id="quality" min="10" max="100" value="100">
+        </div>
+
+        <div class="watermark-section">
+            <label for="watermark">Watermark Text (Optional):</label>
+            <textarea id="watermark" placeholder="Enter watermark text"></textarea>
+        </div>
+
+        <button onclick="convertAndCompress()">Convert & Compress</button>
+
+        <div class="preview-section">
+            <h3>Image Preview:</h3>
+            <div class="image-grid" id="imagePreview"></div>
+        </div>
+
+        <div class="output-section" id="output" style="display: none;">
+            <h3>Processed Images:</h3>
+            <div class="image-grid" id="processedImages"></div>
+            <p><strong>Total Size:</strong> <span id="imageSize"></span></p>
+            <div class="download-options">
+                <a id="downloadZip" style="display: none;" download>Download All as ZIP</a>
+                <button id="downloadPDF" style="display: none;" onclick="convertToPDF()">Download All as PDF</button>
+            </div>
+        </div>
+
+        <p id="error" class="error" style="display: none;"></p>
+
+        <a href="https://www.instagram.com/sandeep_yadav_._._" target="_blank" class="instagram-button">Follow Me on Instagram</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script>
+        // Load preferences from localStorage
+        function loadPreferences() {
+            const format = localStorage.getItem("format") || "jpeg";
+            const unit = localStorage.getItem("unit") || "KB";
+            const quality = localStorage.getItem("quality") || "100";
+            document.getElementById("format").value = format;
+            document.getElementById("unit").value = unit;
+            document.getElementById("quality").value = quality;
+            document.getElementById("qualityValue").textContent = quality;
+        }
+
+        // Save preferences to localStorage
+        function savePreferences() {
+            localStorage.setItem("format", document.getElementById("format").value);
+            localStorage.setItem("unit", document.getElementById("unit").value);
+            localStorage.setItem("quality", document.getElementById("quality").value);
+        }
+
+        // Initialize preferences
+        loadPreferences();
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            const isDarkMode = document.body.classList.contains("dark-mode");
+            document.getElementById("modeToggle").innerHTML = isDarkMode
+                ? '<i class="fas fa-sun"></i>'
+                : '<i class="fas fa-moon"></i>';
+        }
+
+        // Drag and Drop Support
+        const dropZone = document.getElementById("dropZone");
+        dropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("dragover");
+        });
+        dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            const files = e.dataTransfer.files;
+            handleImageUpload({ target: { files } });
+        });
+        dropZone.addEventListener("click", () => {
+            document.getElementById("uploadImage").click();
+        });
+
+        // Handle Image Upload
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            const imagePreview = document.getElementById("imagePreview");
+            const error = document.getElementById("error");
+
+            if (!files.length) {
+                error.textContent = "Please upload at least one image.";
+                error.style.display = "block";
+                return;
+            }
+
+            error.style.display = "none";
+            imagePreview.innerHTML = "";
+
+            Array.from(files).forEach((file) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.alt = file.name;
+                    imagePreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Convert and Compress Images
+        async function convertAndCompress() {
+            const files = document.getElementById("uploadImage").files;
+            const format = document.getElementById("format").value;
+            const width = parseInt(document.getElementById("width").value) || null;
+            const height = parseInt(document.getElementById("height").value) || null;
+            const size = parseInt(document.getElementById("size").value) || null;
+            const unit = document.getElementById("unit").value;
+            const quality = parseInt(document.getElementById("quality").value) / 100;
+            const watermark = document.getElementById("watermark").value;
+            const error = document.getElementById("error");
+
+            if (!files.length) {
+                error.textContent = "Please upload at least one image.";
+                error.style.display = "block";
+                return;
+            }
+            if (!size) {
+                error.textContent = "Please specify a target size.";
+                error.style.display = "block";
+                return;
+            }
+
+            error.style.display = "none";
+            savePreferences();
+
+            const processedImages = document.getElementById("processedImages");
+            processedImages.innerHTML = "";
+            const output = document.getElementById("output");
+            let totalSizeInKB = 0;
+            const processedData = [];
+
+            for (const file of files) {
+                const dataUrl = await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.readAsDataURL(file);
+                });
+
+                const img = await new Promise((resolve) => {
+                    const image = new Image();
+                    image.onload = () => resolve(image);
+                    image.src = dataUrl;
+                });
+
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+
+                // Set dimensions
+                let targetWidth = width || img.width;
+                let targetHeight = height || img.height;
+
+                if (!width && !height) {
+                    const maxPixels = 1200000;
+                    const aspectRatio = img.width / img.height;
+                    targetWidth = Math.round(Math.sqrt(maxPixels * aspectRatio));
+                    targetHeight = Math.round(maxPixels / targetWidth);
+                } else if (width && !height) {
+                    targetHeight = Math.round(width / (img.width / img.height));
+                } else if (height && !width) {
+                    targetWidth = Math.round(height * (img.width / img.height));
+                }
+
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+                ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                // Apply watermark
+                if (watermark) {
+                    ctx.font = "30px Arial";
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+                    ctx.textAlign = "center";
+                    ctx.fillText(watermark, targetWidth / 2, targetHeight - 30);
+                }
+
+                // Compress image
+                let currentQuality = quality;
+                let dataUrl;
+                let compressedSizeInKB;
+                const targetSizeInKB = unit === "MB" ? size * 1024 : size;
+
+                do {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                    if (watermark) {
+                        ctx.font = "30px Arial";
+                        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+                        ctx.textAlign = "center";
+                        ctx.fillText(watermark, targetWidth / 2, targetHeight - 30);
+                    }
+                    dataUrl = canvas.toDataURL(`image/${format}`, currentQuality);
+                    const base64Length = dataUrl.length - (dataUrl.indexOf(",") + 1);
+                    compressedSizeInKB = (base64Length * (3 / 4)) / 1024;
+                    currentQuality -= 0.05;
+                } while (compressedSizeInKB > targetSizeInKB && currentQuality > 0);
+
+                totalSizeInKB += compressedSizeInKB;
+
+                const processedImg = document.createElement("img");
+                processedImg.src = dataUrl;
+                processedImg.alt = file.name;
+                processedImages.appendChild(processedImg);
+
+                processedData.push({ dataUrl, name: file.name });
+            }
+
+            output.style.display = "block";
+            document.getElementById("imageSize").textContent = `${totalSizeInKB.toFixed(2)} KB`;
+
+            const downloadZip = document.getElementById("downloadZip");
+            downloadZip.style.display = "inline-block";
+            downloadZip.onclick = () => createZip(processedData);
+
+            const downloadPDF = document.getElementById("downloadPDF");
+            downloadPDF.style.display = "inline-block";
+        }
+
+        // Create ZIP file for multiple images
+        async function createZip(processedData) {
+            const zip = new JSZip();
+            processedData.forEach(({ dataUrl, name }, index) => {
+                const base64 = dataUrl.split(",")[1];
+                zip.file(`image-${index + 1}.${document.getElementById("format").value}`, base64, { base64: true });
+            });
+            const content = await zip.generateAsync({ type: "blob" });
+            saveAs(content, "processed-images.zip");
+        }
+
+        // Convert to PDF
+        async function convertToPDF() {
+            const { jsPDF } = window.jspdf;
+            const processedImages = document.querySelectorAll("#processedImages img");
+            const pdf = new jsPDF();
+
+            for (let i = 0; i < processedImages.length; i++) {
+                const img = new Image();
+                img.src = processedImages[i].src;
+                await new Promise((resolve) => {
+                    img.onload = resolve;
+                });
+
+                if (i > 0) pdf.addPage();
+                pdf.addImage(img, "JPEG", 10, 10, img.width / 2, img.height / 2);
+            }
+
+            pdf.save("processed-images.pdf");
+        }
+
+        // Update quality value display
+        document.getElementById("quality").addEventListener("input", (e) => {
+            document.getElementById("qualityValue").textContent = e.target.value;
+        });
+    </script>
+</body>
+</html>
