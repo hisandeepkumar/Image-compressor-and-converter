@@ -138,86 +138,99 @@
     }
 
     function convertAndCompress() {
-      const file = document.getElementById("uploadImage").files[0];
-      const format = document.getElementById("format").value;
-      const size = parseInt(document.getElementById("size").value);
-      const unit = document.getElementById("unit").value;
-      const customWidth = parseInt(document.getElementById("customWidth").value);
-      const customHeight = parseInt(document.getElementById("customHeight").value);
+  const file = document.getElementById("uploadImage").files[0];
+  const format = document.getElementById("format").value;
+  const size = parseInt(document.getElementById("size").value);
+  const unit = document.getElementById("unit").value;
+  const customWidth = parseInt(document.getElementById("customWidth").value);
+  const customHeight = parseInt(document.getElementById("customHeight").value);
 
-      if (!file || isNaN(size)) {
-        alert("Please upload an image and enter a valid target size.");
+  if (!file || isNaN(size)) {
+    alert("Please upload an image and enter a valid target size.");
+    return;
+  }
+
+  const targetSizeInKB = unit === "MB" ? size * 1024 : size;
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    const img = new Image();
+    img.src = e.target.result;
+
+    img.onload = function () {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const originalWidth = img.width;
+      const originalHeight = img.height;
+      const aspectRatio = originalWidth / originalHeight;
+
+      let width = customWidth;
+      let height = customHeight;
+
+      if (width && !height) {
+        height = Math.round(width / aspectRatio);
+      } else if (!width && height) {
+        width = Math.round(height * aspectRatio);
+      } else if (!width && !height) {
+        width = Math.round(Math.sqrt(1200000 * (originalWidth / originalHeight)));
+        height = Math.round(1200000 / width);
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      if (format === "pdf") {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: width > height ? "landscape" : "portrait",
+          unit: "px",
+          format: [width, height]
+        });
+        pdf.addImage(canvas.toDataURL("image/jpeg", 1.0), 'JPEG', 0, 0, width, height);
+        const pdfBlob = pdf.output("bloburl");
+        document.getElementById("processedImage").style.display = "none";
+        const download = document.getElementById("downloadLink");
+        download.href = pdfBlob;
+        download.download = "converted.pdf";
+        download.textContent = "Download PDF";
+        download.style.display = "inline-block";
+        document.getElementById("output").style.display = "block";
+        document.getElementById("imageSize").textContent = "-";
         return;
       }
 
-      const targetSizeInKB = unit === "MB" ? size * 1024 : size;
-      const reader = new FileReader();
+      let quality = 1.0;
+      let dataUrl, compressedSize;
 
-      reader.onload = function (e) {
-        const img = new Image();
-        img.src = e.target.result;
+      do {
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        dataUrl = canvas.toDataURL("image/" + format, quality);
+        const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
+        compressedSize = (base64Length * (3 / 4)) / 1024;
+        quality -= 0.05;
+      } while (compressedSize > targetSizeInKB && quality > 0);
 
-        img.onload = function () {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
+      const output = document.getElementById("output");
+      const preview = document.getElementById("processedImage");
+      preview.src = dataUrl;
+      preview.style.display = "block";
 
-          let width = customWidth || Math.round(Math.sqrt(1200000 * (img.width / img.height)));
-          let height = customHeight || Math.round(1200000 / width);
+      document.getElementById("imageSize").textContent = `${compressedSize.toFixed(2)} KB`;
 
-          canvas.width = width;
-          canvas.height = height;
-          ctx.drawImage(img, 0, 0, width, height);
+      const download = document.getElementById("downloadLink");
+      download.href = dataUrl;
+      download.download = "converted." + format;
+      download.textContent = "Download Image";
+      download.style.display = "inline-block";
 
-          if (format === "pdf") {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({
-              orientation: width > height ? "landscape" : "portrait",
-              unit: "px",
-              format: [width, height]
-            });
-            pdf.addImage(canvas.toDataURL("image/jpeg", 1.0), 'JPEG', 0, 0, width, height);
-            const pdfBlob = pdf.output("bloburl");
-            document.getElementById("processedImage").style.display = "none";
-            const download = document.getElementById("downloadLink");
-            download.href = pdfBlob;
-            download.download = "converted.pdf";
-            download.textContent = "Download PDF";
-            download.style.display = "inline-block";
-            document.getElementById("output").style.display = "block";
-            document.getElementById("imageSize").textContent = "-";
-            return;
-          }
-
-          let quality = 1.0;
-          let dataUrl, compressedSize;
-
-          do {
-            ctx.clearRect(0, 0, width, height);
-            ctx.drawImage(img, 0, 0, width, height);
-            dataUrl = canvas.toDataURL("image/" + format, quality);
-            const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
-            compressedSize = (base64Length * (3/4)) / 1024;
-            quality -= 0.05;
-          } while (compressedSize > targetSizeInKB && quality > 0);
-
-          const output = document.getElementById("output");
-          const preview = document.getElementById("processedImage");
-          preview.src = dataUrl;
-          preview.style.display = "block";
-
-          document.getElementById("imageSize").textContent = `${compressedSize.toFixed(2)} KB`;
-
-          const download = document.getElementById("downloadLink");
-          download.href = dataUrl;
-          download.download = "converted." + format;
-          download.textContent = "Download Image";
-          download.style.display = "inline-block";
-
-          output.style.display = "block";
-        };
-      };
-      reader.readAsDataURL(file);
-    }
+      output.style.display = "block";
+    };
+  };
+  reader.readAsDataURL(file);
+}
   </script>
 </body>
 </html>
