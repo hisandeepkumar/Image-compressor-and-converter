@@ -110,11 +110,11 @@
       margin-top: 20px;
       border-radius: 8px;
       border: 1px solid #ffffff;
-      transition: filter 0.5s ease, opacity 0.5s ease;
+      transition: filter 0.3s ease, opacity 0.3s ease;
     }
     .processing-blur {
-      filter: blur(10px);
-      opacity: 0.7;
+      filter: blur(12px);
+      opacity: 0.6;
     }
     .output {
       margin-top: 20px;
@@ -239,14 +239,14 @@
       processedImage.classList.add("processing-blur");
       document.getElementById("downloadLink").style.display = "none";
 
-      // Simulate processing with blur reduction
+      // Simulate processing with noticeable blur reduction
       let progress = 0;
       const blurInterval = setInterval(() => {
-        progress += 10;
-        processedImage.style.filter = `blur(${10 - (progress / 100) * 10}px)`;
-        processedImage.style.opacity = `${0.7 + (progress / 100) * 0.3}`;
+        progress += 5; // Smaller increments for smoother transition
+        processedImage.style.filter = `blur(${12 - (progress / 100) * 12}px)`;
+        processedImage.style.opacity = `${0.6 + (progress / 100) * 0.4}`;
         if (progress >= 100) clearInterval(blurInterval);
-      }, 200);
+      }, 150); // 3-second total duration
 
       let targetSizeInKB;
       if (sizeInput && !isNaN(sizeInput)) {
@@ -264,20 +264,22 @@
           let width = img.width;
           let height = img.height;
 
+          // Apply custom dimensions if provided
           if (customWidth && !isNaN(customWidth)) width = customWidth;
           if (customHeight && !isNaN(customHeight)) height = customHeight;
 
-          if (targetSizeInKB === null && !customWidth && !customHeight) {
-            const maxDimension = Math.sqrt(1.2 * 1024 * 1024);
-            const aspectRatio = img.width / img.height;
-            if (img.width > img.height) {
-              width = maxDimension;
-              height = maxDimension / aspectRatio;
-            } else {
-              height = maxDimension;
-              width = maxDimension * aspectRatio;
+          // Resize to 1.5MP if target size is specified and no custom dimensions
+          if (targetSizeInKB !== null && !customWidth && !customHeight) {
+            const maxPixels = 1.5 * 1000000; // 1.5MP
+            const currentPixels = img.width * img.height;
+            if (currentPixels > maxPixels) {
+              const scale = Math.sqrt(maxPixels / currentPixels);
+              width = Math.round(img.width * scale);
+              height = Math.round(img.height * scale);
             }
           }
+          // If no target size and no custom dimensions, keep original dimensions
+          // No resizing or compression
 
           const canvas = document.createElement("canvas");
           canvas.width = width;
@@ -296,7 +298,8 @@
               quality -= 0.05;
             } while (compressedSize > targetSizeInKB && quality > 0);
           } else {
-            dataUrl = canvas.toDataURL("image/png");
+            // Use original quality for the specified format
+            dataUrl = canvas.toDataURL(`image/${format === "jpeg" ? "jpeg" : "png"}`);
           }
 
           if (format === "pdf") {
