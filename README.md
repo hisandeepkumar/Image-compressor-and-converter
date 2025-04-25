@@ -39,6 +39,17 @@ This tool allows users to upload images, convert them to various formats, compre
    - Once the processing is complete, download the converted and compressed image.
 
 
-## License
+## 🏆 License
+This project is open-source and free to use under the **MIT License**.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
+🔗 **Made with ❤️ by Sandeep**
+
+
+
+## 🔗 Live Demo  
+[![Live Demo](https://img.shields.io/badge/🚀-Visit_Live_Demo-blue?style=for-the-badge)](https://hisandeepkumar.github.io/Image-compressor-and-converter/)  
+
+## 📢 Connect with Me  
+[![Instagram](https://img.shields.io/badge/📸-Follow_Me_on_Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/sandeep_yadav_._._/)
+---
