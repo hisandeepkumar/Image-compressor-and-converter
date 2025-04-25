@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -79,46 +80,50 @@
 <body>
   <div class="container">
     <h1>Image Converter, Compressor & PDF Export</h1>
-    <p>Upload an image, compress it, convert it to various formats or PDF, and set custom dimensions too.</p><input type="file" id="uploadImage" accept="image/*" onchange="handleImageUpload()">
+    <p>Upload an image, compress it, convert it to various formats or PDF, and set custom dimensions too.</p>
+    
+    <input type="file" id="uploadImage" accept="image/*" onchange="handleImageUpload()">
 
-<h3>Preview:</h3>
-<img id="imagePreview" alt="Image Preview" style="display:none">
+    <h3>Preview:</h3>
+    <img id="imagePreview" alt="Image Preview" style="display:none">
 
-<label>Select Format:</label>
-<select id="format">
-  <option value="jpeg">JPG</option>
-  <option value="png">PNG</option>
-  <option value="webp">WEBP</option>
-  <option value="gif">GIF</option>
-  <option value="bmp">BMP</option>
-  <option value="pdf">PDF</option>
-</select>
+    <label>Select Format:</label>
+    <select id="format">
+      <option value="jpeg">JPG</option>
+      <option value="png">PNG</option>
+      <option value="webp">WEBP</option>
+      <option value="gif">GIF</option>
+      <option value="bmp">BMP</option>
+      <option value="pdf">PDF</option>
+    </select>
 
-<label>Target Size (optional):</label>
-<input type="number" id="size" placeholder="e.g. 200" min="1">
-<select id="unit">
-  <option value="KB">KB</option>
-  <option value="MB">MB</option>
-</select>
+    <label>Target Size (optional):</label>
+    <input type="number" id="size" placeholder="e.g. 200" min="1">
+    <select id="unit">
+      <option value="KB">KB</option>
+      <option value="MB">MB</option>
+    </select>
 
-<label>Custom Width (px, optional):</label>
-<input type="number" id="customWidth" placeholder="Optional">
+    <label>Custom Width (px, optional):</label>
+    <input type="number" id="customWidth" placeholder="Optional">
 
-<label>Custom Height (px, optional):</label>
-<input type="number" id="customHeight" placeholder="Optional">
+    <label>Custom Height (px, optional):</label>
+    <input type="number" id="customHeight" placeholder="Optional">
 
-<button onclick="convertAndCompress()">Convert & Compress</button>
+    <button onclick="convertAndCompress()">Convert & Compress</button>
 
-<div class="output" id="output" style="display: none;">
-  <h2>Processed Image:</h2>
-  <img id="processedImage" alt="Processed Image">
-  <p><strong>Final Size:</strong> <span id="imageSize"></span></p>
-  <a id="downloadLink" style="display: none;" download>Download</a>
-</div>
+    <div class="output" id="output" style="display: none;">
+      <h2>Processed Image:</h2>
+      <img id="processedImage" alt="Processed Image">
+      <p><strong>Final Size:</strong> <span id="imageSize"></span></p>
+      <a id="downloadLink" style="display: none;" download>Download</a>
+    </div>
 
-<a href="https://www.instagram.com/sandeep_yadav_._._" class="instagram-button" target="_blank">Follow Me on Instagram</a>
+    <a href="https://www.instagram.com/sandeep_yadav_._._" class="instagram-button" target="_blank">Follow Me on Instagram</a>
+  </div>
 
-  </div>  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>  <script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
     function handleImageUpload() {
       const file = document.getElementById("uploadImage").files[0];
       if (!file) return;
@@ -157,23 +162,26 @@
         const img = new Image();
         img.src = e.target.result;
         img.onload = function () {
-          // Resize to 1.2 MP (1,200,000 pixels) without quality loss
-          const origWidth = img.width;
-          const origHeight = img.height;
-          const origPixels = origWidth * origHeight;
-          const targetPixels = 1200000;
-          let width, height;
-          if (origPixels > targetPixels) {
-            const ratio = Math.sqrt(targetPixels / origPixels);
-            width = Math.round(origWidth * ratio);
-            height = Math.round(origHeight * ratio);
-          } else {
-            width = origWidth;
-            height = origHeight;
-          }
-          // Override if custom dimensions provided
+          // If target size is not specified and custom dimensions are not set, use original size
+          let width = img.width;
+          let height = img.height;
+
+          // Apply custom dimensions if provided
           if (customWidth && !isNaN(customWidth)) width = customWidth;
           if (customHeight && !isNaN(customHeight)) height = customHeight;
+
+          // If target size is specified, resize to 1.2MP
+          if (targetSizeInKB === null && !customWidth && !customHeight) {
+            const maxDimension = Math.sqrt(1.2 * 1024 * 1024); // 1.2MP
+            const aspectRatio = img.width / img.height;
+            if (img.width > img.height) {
+              width = maxDimension;
+              height = maxDimension / aspectRatio;
+            } else {
+              height = maxDimension;
+              width = maxDimension * aspectRatio;
+            }
+          }
 
           // Create canvas
           const canvas = document.createElement("canvas");
@@ -205,13 +213,13 @@
             const pdfHeight = (height * pdfWidth) / width;
             doc.addImage(dataUrl, imageFormat.toUpperCase(), 0, 0, pdfWidth, pdfHeight);
             const pdfDataUrl = doc.output('dataurlstring');
-            // Display processed image
+            // Set processedImage to dataUrl (image used in PDF)
             document.getElementById("processedImage").src = dataUrl;
             // Calculate PDF size
             const pdfBase64Length = pdfDataUrl.length - pdfDataUrl.indexOf(',') - 1;
             const pdfSizeInKB = (pdfBase64Length * 3 / 4) / 1024;
             document.getElementById("imageSize").textContent = `${pdfSizeInKB.toFixed(2)} KB`;
-            // Download link
+            // Set download link
             document.getElementById("downloadLink").href = pdfDataUrl;
             document.getElementById("downloadLink").download = "converted.pdf";
             document.getElementById("downloadLink").textContent = "Download PDF";
@@ -240,15 +248,15 @@
             } else {
               dataUrl = canvas.toDataURL(mimeType);
             }
-            // Display processed image
+            // Set processedImage
             document.getElementById("processedImage").src = dataUrl;
             // Calculate size
             const base64Length = dataUrl.length - dataUrl.indexOf(',') - 1;
             const sizeInKB = (base64Length * 3 / 4) / 1024;
             document.getElementById("imageSize").textContent = `${sizeInKB.toFixed(2)} KB`;
-            // Download link
+            // Set download link
             document.getElementById("downloadLink").href = dataUrl;
-            document.getElementById("downloadLink").download = `converted.${format === 'jpeg' ? 'jpg' : format}`;
+            document.getElementById("downloadLink").download = `converted.${format}`;
             document.getElementById("downloadLink").textContent = "Download Image";
             document.getElementById("downloadLink").style.display = "inline-block";
             document.getElementById("output").style.display = "block";
@@ -257,5 +265,6 @@
       };
       reader.readAsDataURL(file);
     }
-  </script></body>
-</html>
+  </script>
+</body>
+</html
