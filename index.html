@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Converter and Compressor</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      overflow-x: hidden;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #00ffe5;
+      text-shadow: 0 0 10px #00ffe5;
+    }
+    input, select {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      font-family: 'Orbitron', sans-serif;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      box-shadow: inset 0 0 5px rgba(0, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+    input:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 10px #00bcd4;
+    }
+    button, a.download-link, a.instagram-button {
+      padding: 12px;
+      margin: 10px 0;
+      width: 100%;
+      border-radius: 25px;
+      border: none;
+      font-size: 16px;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(45deg, #00bcd4, #00ffe5);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      animation: pulseGlow 1.5s infinite;
+    }
+    button:hover, a.download-link:hover, a.instagram-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.7), 0 0 30px rgba(0, 255, 255, 0.5);
+    }
+    button:active, a.download-link:active {
+      transform: scale(0.95);
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3); }
+      50% { box-shadow: 0 5px 25px rgba(0, 255, 255, 0.7), 0 0 40px rgba(0, 255, 255, 0.5); }
+      100% { box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3); }
+    }
+    img {
+      max-width: 100%;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+      animation: slideIn 0.5s ease-in-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .output {
+      margin-top: 20px;
+      animation: slideIn 0.5s ease-in-out;
+    }
+    .progress-container {
+      display: none;
+      margin: 20px 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+    .progress-bar {
+      width: 0;
+      height: 10px;
+      background: linear-gradient(45deg, #00bcd4, #00ffe5);
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px #00ffe5;
+    }
+    .progress-text {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #00ffe5;
+      text-shadow: 0 0 5px #00ffe5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Image Converter, Compressor & PDF Export</h1>
+    <p>Upload an image, compress it, convert it to various formats or PDF, and set custom dimensions too.</p>
+    
+    <input type="file" id="uploadImage" accept="image/*" onchange="handleImageUpload()">
+
+    <h3>Preview:</h3>
+    <img id="imagePreview" alt="Image Preview" style="display:none">
+
+    <label>Select Format:</label>
+    <select id="format">
+      <option value="jpeg">JPG</option>
+      <option value="png">PNG</option>
+      <option value="webp">WEBP</option>
+      <option value="gif">GIF</option>
+      <option value="bmp">BMP</option>
+      <option value="pdf">PDF</option>
+    </select>
+
+    <label>Target Size (optional):</label>
+    <input type="number" id="size" placeholder="e.g. 200" min="1">
+    <select id="unit">
+      <option value="KB">KB</option>
+      <option value="MB">MB</option>
+    </select>
+
+    <label>Custom Width (px, optional):</label>
+    <input type="number" id="customWidth" placeholder="Optional">
+
+    <label>Custom Height (px, optional):</label>
+    <input type="number" id="customHeight" placeholder="Optional">
+
+    <button onclick="convertAndCompress()">Convert & Compress</button>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar" id="progressBar"></div>
+      <div class="progress-text" id="progressText">Processing...</div>
+    </div>
+
+    <div class="output" id="output" style="display: none;">
+      <h2>Processed Image:</h2>
+      <img id="processedImage" alt="Processed Image">
+      <p><strong>Final Size:</strong> <span id="imageSize"></span></p>
+      <a id="downloadLink" class="download-link" style="display: none;" download>Download</a>
+    </div>
+
+    <a href="https://www.instagram.com/sandeep_yadav_._._" class="instagram-button" target="_blank">Follow Me on Instagram</a>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    function handleImageUpload() {
+      const file = document.getElementById("uploadImage").files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.getElementById("imagePreview");
+        img.src = e.target.result;
+        img.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function convertAndCompress() {
+      const file = document.getElementById("uploadImage").files[0];
+      const format = document.getElementById("format").value;
+      const sizeInput = document.getElementById("size").value;
+      const unit = document.getElementById("unit").value;
+      const customWidth = parseInt(document.getElementById("customWidth").value);
+      const customHeight = parseInt(document.getElementById("customHeight").value);
+
+      if (!file) {
+        alert("Please upload an image.");
+        return;
+      }
+
+      // Show progress bar
+      const progressContainer = document.getElementById("progressContainer");
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      progressContainer.style.display = "block";
+      progressBar.style.width = "0%";
+      progressText.textContent = "Processing...";
+
+      // Simulate progress
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = `${progress}%`;
+        if (progress >= 100) clearInterval(progressInterval);
+      }, 200);
+
+      let targetSizeInKB;
+      if (sizeInput && !isNaN(sizeInput)) {
+        const size = parseFloat(sizeInput);
+        targetSizeInKB = unit === "MB" ? size * 1024 : size;
+      } else {
+        targetSizeInKB = null;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = function () {
+          let width = img.width;
+          let height = img.height;
+
+          if (customWidth && !isNaN(customWidth)) width = customWidth;
+          if (customHeight && !isNaN(customHeight)) height = customHeight;
+
+          if (targetSizeInKB === null && !customWidth && !customHeight) {
+            const maxDimension = Math.sqrt(1.2 * 1024 * 1024);
+            const aspectRatio = img.width / img.height;
+            if (img.width > img.height) {
+              width = maxDimension;
+              height = maxDimension / aspectRatio;
+            } else {
+              height = maxDimension;
+              width = maxDimension * aspectRatio;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          let dataUrl;
+          if (targetSizeInKB) {
+            let quality = 1.0;
+            let compressedSize;
+            do {
+              dataUrl = canvas.toDataURL("image/jpeg", quality);
+              const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
+              compressedSize = (base64Length * 3 / 4) / 1024;
+              quality -= 0.05;
+            } while (compressedSize > targetSizeInKB && quality > 0);
+          } else {
+            dataUrl = canvas.toDataURL("image/png");
+          }
+
+          if (format === "pdf") {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const pdfWidth = doc.internal.pageSize.getWidth();
+            const pdfHeight = (height * pdfWidth) / width;
+            doc.addImage(dataUrl, "JPEG", 0, 0, pdfWidth, pdfHeight);
+            const pdfDataUrl = doc.output("dataurlstring");
+            setOutput(pdfDataUrl, "pdf", dataUrl);
+          } else if (format === "jpeg") {
+            setOutput(dataUrl, "jpeg", dataUrl);
+          } else if (format === "png" || format === "gif" || format === "bmp") {
+            const tempImg = new Image();
+            tempImg.src = dataUrl;
+            tempImg.onload = function () {
+              const tempCanvas = document.createElement("canvas");
+              tempCanvas.width = width;
+              tempCanvas.height = height;
+              const tempCtx = tempCanvas.getContext("2d");
+              tempCtx.drawImage(tempImg, 0, 0);
+              const finalDataUrl = tempCanvas.toDataURL("image/png");
+              setOutput(finalDataUrl, format, finalDataUrl);
+            };
+          } else if (format === "webp") {
+            const finalDataUrl = canvas.toDataURL("image/webp");
+            setOutput(finalDataUrl, "webp", finalDataUrl);
+          }
+        };
+      };
+      reader.readAsDataURL(file);
+
+      function setOutput(dataUrl, format, previewUrl) {
+        clearInterval(progressInterval);
+        progressBar.style.width = "100%";
+        progressText.textContent = "Completed!";
+        setTimeout(() => {
+          progressContainer.style.display = "none";
+        }, 500);
+
+        document.getElementById("processedImage").src = previewUrl;
+        const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
+        const sizeInKB = (base64Length * 3 / 4) / 1024;
+        document.getElementById("imageSize").textContent = `${sizeInKB.toFixed(2)} KB`;
+        document.getElementById("downloadLink").href = dataUrl;
+        document.getElementById("downloadLink").download = `converted.${format === "jpeg" ? "jpg" : format}`;
+        document.getElementById("downloadLink").textContent = format === "pdf" ? "Download PDF" : "Download Image";
+        document.getElementById("downloadLink").style.display = "inline-block";
+        document.getElementById("output").style.display = "block";
+      }
+    }
+  </script>
+</body>
+</html>
