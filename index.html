@@ -110,11 +110,11 @@
       margin-top: 20px;
       border-radius: 8px;
       border: 1px solid #ffffff;
-      transition: filter 0.3s ease, opacity 0.3s ease;
+      transition: filter 0.4s ease, opacity 0.4s ease;
     }
     .processing-blur {
-      filter: blur(12px);
-      opacity: 0.6;
+      filter: blur(15px);
+      opacity: 0.3;
     }
     .output {
       margin-top: 20px;
@@ -239,14 +239,14 @@
       processedImage.classList.add("processing-blur");
       document.getElementById("downloadLink").style.display = "none";
 
-      // Simulate processing with noticeable blur reduction
+      // Simulate processing with cinematic blur reduction
       let progress = 0;
       const blurInterval = setInterval(() => {
-        progress += 5; // Smaller increments for smoother transition
-        processedImage.style.filter = `blur(${12 - (progress / 100) * 12}px)`;
-        processedImage.style.opacity = `${0.6 + (progress / 100) * 0.4}`;
+        progress += 4; // Finer increments for smoother transition
+        processedImage.style.filter = `blur(${15 - (progress / 100) * 15}px)`;
+        processedImage.style.opacity = `${0.3 + (progress / 100) * 0.7}`;
         if (progress >= 100) clearInterval(blurInterval);
-      }, 150); // 3-second total duration
+      }, 160); // 4-second total duration (25 steps * 160ms)
 
       let targetSizeInKB;
       if (sizeInput && !isNaN(sizeInput)) {
@@ -279,7 +279,6 @@
             }
           }
           // If no target size and no custom dimensions, keep original dimensions
-          // No resizing or compression
 
           const canvas = document.createElement("canvas");
           canvas.width = width;
