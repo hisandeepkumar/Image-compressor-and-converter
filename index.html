@@ -5,24 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Image Converter and Compressor</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
     body {
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
       margin: 0;
       padding: 20px;
       text-align: center;
       overflow-x: hidden;
     }
     .container {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
       padding: 30px;
       max-width: 700px;
       margin: auto;
-      box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       animation: fadeIn 1s ease-in-out;
     }
     @keyframes fadeIn {
@@ -30,72 +30,87 @@
       to { opacity: 1; transform: translateY(0); }
     }
     h1 {
-      font-size: 24px;
+      font-size: 28px;
       margin-bottom: 20px;
-      color: #00ffe5;
-      text-shadow: 0 0 10px #00ffe5;
+      color: #38bdf8;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+    .drop-zone {
+      border: 2px dashed #38bdf8;
+      border-radius: 15px;
+      padding: 20px;
+      margin: 10px 0;
+      background: rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .drop-zone.dragover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #a5f3fc;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
     }
     input, select {
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
       width: 100%;
       border-radius: 10px;
       border: none;
       font-size: 16px;
-      font-family: 'Orbitron', sans-serif;
       background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      box-shadow: inset 0 0 5px rgba(0, 255, 255, 0.2);
+      color: #e2e8f0;
+      box-shadow: inset 0 0 5px rgba(56, 189, 248, 0.2);
       transition: all 0.3s ease;
     }
     input:focus, select:focus {
       outline: none;
-      box-shadow: 0 0 10px #00bcd4;
+      box-shadow: 0 0 10px #38bdf8;
     }
-    button, a.download-link, a.instagram-button {
+    button, a.download-button {
       padding: 12px;
       margin: 10px 0;
       width: 100%;
       border-radius: 25px;
       border: none;
       font-size: 16px;
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(45deg, #00bcd4, #00ffe5);
-      color: #fff;
-      font-weight: bold;
+      font-weight: 500;
+      background: linear-gradient(45deg, #38bdf8, #a5f3fc);
+      color: #0f172a;
       cursor: pointer;
-      box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3);
+      box-shadow: 0 5px 15px rgba(56, 189, 248, 0.5), 0 0 20px rgba(56, 189, 248, 0.3);
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
       animation: pulseGlow 1.5s infinite;
     }
-    button:hover, a.download-link:hover, a.instagram-button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 5px 20px rgba(0, 255, 255, 0.7), 0 0 30px rgba(0, 255, 255, 0.5);
+    button:hover, a.download-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(56, 189, 248, 0.7), 0 0 30px rgba(56, 189, 248, 0.5);
     }
-    button:active, a.download-link:active {
+    button:active, a.download-button:active {
       transform: scale(0.95);
     }
     @keyframes pulseGlow {
-      0% { box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3); }
-      50% { box-shadow: 0 5px 25px rgba(0, 255, 255, 0.7), 0 0 40px rgba(0, 255, 255, 0.5); }
-      100% { box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3); }
+      0% { box-shadow: 0 5px 15px rgba(56, 189, 248, 0.5), 0 0 20px rgba(56, 189, 248, 0.3); }
+      50% { box-shadow: 0 5px 25px rgba(56, 189, 248, 0.7), 0 0 40px rgba(56, 189, 248, 0.5); }
+      100% { box-shadow: 0 5px 15px rgba(56, 189, 248, 0.5), 0 0 20px rgba(56, 189, 248, 0.3); }
     }
     img {
       max-width: 100%;
       margin-top: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+      transition: filter 0.5s ease;
+    }
+    .processing-blur {
+      filter: blur(8px);
+    }
+    .output {
+      margin-top: 20px;
       animation: slideIn 0.5s ease-in-out;
     }
     @keyframes slideIn {
       from { opacity: 0; transform: translateX(-20px); }
       to { opacity: 1; transform: translateX(0); }
-    }
-    .output {
-      margin-top: 20px;
-      animation: slideIn 0.5s ease-in-out;
     }
     .progress-container {
       display: none;
@@ -104,29 +119,48 @@
       background: rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
     }
     .progress-bar {
       width: 0;
       height: 10px;
-      background: linear-gradient(45deg, #00bcd4, #00ffe5);
+      background: linear-gradient(45deg, #38bdf8, #a5f3fc);
       transition: width 0.3s ease;
-      box-shadow: 0 0 10px #00ffe5;
+      box-shadow: 0 0 10px #38bdf8;
     }
     .progress-text {
       margin-top: 10px;
       font-size: 14px;
-      color: #00ffe5;
-      text-shadow: 0 0 5px #00ffe5;
+      color: #38bdf8;
+      text-shadow: 0 0 5px #38bdf8;
+    }
+    .instagram-button {
+      display: inline-block;
+      padding: 12px 25px;
+      margin-top: 20px;
+      background: linear-gradient(45deg, #f43f5e, #fb7185);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 25px;
+      font-weight: 500;
+      box-shadow: 0 5px 15px rgba(244, 63, 94, 0.5);
+      transition: all 0.3s ease;
+    }
+    .instagram-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(244, 63, 94, 0.7);
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Image Converter, Compressor & PDF Export</h1>
-    <p>Upload an image, compress it, convert it to various formats or PDF, and set custom dimensions too.</p>
+    <p>Upload or drag-and-drop an image to compress, convert, or resize.</p>
     
-    <input type="file" id="uploadImage" accept="image/*" onchange="handleImageUpload()">
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="uploadImage" accept="image/*" onchange="handleImageUpload(event)">
+      <p>Drag & Drop Image Here or Click to Upload</p>
+    </div>
 
     <h3>Preview:</h3>
     <img id="imagePreview" alt="Image Preview" style="display:none">
@@ -142,17 +176,17 @@
     </select>
 
     <label>Target Size (optional):</label>
-    <input type="number" id="size" placeholder="e.g. 200" min="1">
-    <select id="unit">
+    <input type="number" id="size" placeholder="e.g. 200" min="1" oninput="updateRealTimePreview()">
+    <select id="unit" oninput="updateRealTimePreview()">
       <option value="KB">KB</option>
       <option value="MB">MB</option>
     </select>
 
     <label>Custom Width (px, optional):</label>
-    <input type="number" id="customWidth" placeholder="Optional">
+    <input type="number" id="customWidth" placeholder="Optional" oninput="updateRealTimePreview()">
 
     <label>Custom Height (px, optional):</label>
-    <input type="number" id="customHeight" placeholder="Optional">
+    <input type="number" id="customHeight" placeholder="Optional" oninput="updateRealTimePreview()">
 
     <button onclick="convertAndCompress()">Convert & Compress</button>
 
@@ -165,7 +199,7 @@
       <h2>Processed Image:</h2>
       <img id="processedImage" alt="Processed Image">
       <p><strong>Final Size:</strong> <span id="imageSize"></span></p>
-      <a id="downloadLink" class="download-link" style="display: none;" download>Download</a>
+      <a id="downloadLink" class="download-button" style="display: none;" download>Download</a>
     </div>
 
     <a href="https://www.instagram.com/sandeep_yadav_._._" class="instagram-button" target="_blank">Follow Me on Instagram</a>
@@ -173,16 +207,81 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    function handleImageUpload() {
-      const file = document.getElementById("uploadImage").files[0];
+    let currentImage = null;
+
+    // Drag-and-Drop Handling
+    const dropZone = document.getElementById("dropZone");
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("dragover");
+    });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) {
+        document.getElementById("uploadImage").files = e.dataTransfer.files;
+        handleImageUpload({ target: { files: [file] } });
+      }
+    });
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = function (e) {
+        currentImage = e.target.result;
         const img = document.getElementById("imagePreview");
-        img.src = e.target.result;
+        img.src = currentImage;
         img.style.display = "block";
+        updateRealTimePreview();
       };
       reader.readAsDataURL(file);
+    }
+
+    function updateRealTimePreview() {
+      if (!currentImage) return;
+      const sizeInput = document.getElementById("size").value;
+      const unit = document.getElementById("unit").value;
+      const customWidth = parseInt(document.getElementById("customWidth").value);
+      const customHeight = parseInt(document.getElementById("customHeight").value);
+
+      let targetSizeInKB = sizeInput && !isNaN(sizeInput) ? (unit === "MB" ? parseFloat(sizeInput) * 1024 : parseFloat(sizeInput)) : null;
+
+      const img = new Image();
+      img.src = currentImage;
+      img.onload = function () {
+        let width = img.width;
+        let height = img.height;
+
+        if (customWidth && !isNaN(customWidth)) width = customWidth;
+        if (customHeight && !isNaN(customHeight)) height = customHeight;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        let dataUrl;
+        if (targetSizeInKB) {
+          let quality = 1.0;
+          let compressedSize;
+          do {
+            dataUrl = canvas.toDataURL("image/jpeg", quality);
+            const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
+            compressedSize = (base64Length * 3 / 4) / 1024;
+            quality -= 0.05;
+          } while (compressedSize > targetSizeInKB && quality > 0);
+        } else {
+          dataUrl = canvas.toDataURL("image/png");
+        }
+
+        document.getElementById("imagePreview").src = dataUrl;
+      };
     }
 
     function convertAndCompress() {
@@ -198,19 +297,24 @@
         return;
       }
 
-      // Show progress bar
+      // Show progress bar and blur processed image
       const progressContainer = document.getElementById("progressContainer");
       const progressBar = document.getElementById("progressBar");
       const progressText = document.getElementById("progressText");
+      const processedImage = document.getElementById("processedImage");
       progressContainer.style.display = "block";
       progressBar.style.width = "0%";
       progressText.textContent = "Processing...";
+      processedImage.classList.add("processing-blur");
+      document.getElementById("output").style.display = "block";
+      document.getElementById("downloadLink").style.display = "none";
 
       // Simulate progress
       let progress = 0;
       const progressInterval = setInterval(() => {
         progress += 10;
         progressBar.style.width = `${progress}%`;
+        processedImage.style.filter = `blur(${8 - (progress / 100) * 8}px)`;
         if (progress >= 100) clearInterval(progressInterval);
       }, 200);
 
@@ -301,17 +405,16 @@
         progressText.textContent = "Completed!";
         setTimeout(() => {
           progressContainer.style.display = "none";
+          processedImage.classList.remove("processing-blur");
+          processedImage.src = previewUrl;
+          const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
+          const sizeInKB = (base64Length * 3 / 4) / 1024;
+          document.getElementById("imageSize").textContent = `${sizeInKB.toFixed(2)} KB`;
+          document.getElementById("downloadLink").href = dataUrl;
+          document.getElementById("downloadLink").download = `converted.${format === "jpeg" ? "jpg" : format}`;
+          document.getElementById("downloadLink").textContent = format === "pdf" ? "Download PDF" : "Download Image";
+          document.getElementById("downloadLink").style.display = "inline-block";
         }, 500);
-
-        document.getElementById("processedImage").src = previewUrl;
-        const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
-        const sizeInKB = (base64Length * 3 / 4) / 1024;
-        document.getElementById("imageSize").textContent = `${sizeInKB.toFixed(2)} KB`;
-        document.getElementById("downloadLink").href = dataUrl;
-        document.getElementById("downloadLink").download = `converted.${format === "jpeg" ? "jpg" : format}`;
-        document.getElementById("downloadLink").textContent = format === "pdf" ? "Download PDF" : "Download Image";
-        document.getElementById("downloadLink").style.display = "inline-block";
-        document.getElementById("output").style.display = "block";
       }
     }
   </script>
