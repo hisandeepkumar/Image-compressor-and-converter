@@ -265,7 +265,7 @@
     .download-btn {
       background: rgba(76, 175, 80, 0.3);
       border-color: rgba(76, 175, 80, 0.5);
-      box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 24px rgba(76, 175, 80, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2), inset 极 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .download-btn:hover {
@@ -432,6 +432,7 @@
   <script>
     // Store the selected file
     let selectedFile = null;
+    let originalFormat = null;
 
     // Drag-and-Drop Handling
     const uploadArea = document.getElementById("uploadArea");
@@ -442,6 +443,7 @@
     const output = document.getElementById("output");
     const imageSize = document.getElementById("imageSize");
     const downloadLink = document.getElementById("downloadLink");
+    const formatSelect = document.getElementById("format");
 
     // Upload area click handler
     uploadArea.addEventListener('click', () => {
@@ -484,6 +486,27 @@
       }
       
       selectedFile = file;
+      
+      // Extract and set the original format
+      const fileName = file.name.toLowerCase();
+      if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg')) {
+        originalFormat = 'jpeg';
+      } else if (fileName.endsWith('.png')) {
+        originalFormat = 'png';
+      } else if (fileName.endsWith('.webp')) {
+        originalFormat = 'webp';
+      } else if (fileName.endsWith('.gif')) {
+        originalFormat = 'gif';
+      } else if (fileName.endsWith('.bmp')) {
+        originalFormat = 'bmp';
+      } else {
+        // Default to jpeg if format is not recognized
+        originalFormat = 'jpeg';
+      }
+      
+      // Set the format dropdown to match the original format
+      formatSelect.value = originalFormat;
+      
       const reader = new FileReader();
       
       reader.onload = function(e) {
@@ -499,7 +522,55 @@
       convertAndCompress();
     });
 
-    // Main conversion function (from first webpage)
+    // PNG compression function
+    function compressPNG(canvas, targetSizeInKB, maxIterations = 10) {
+      let dataUrl = canvas.toDataURL("image/png");
+      let base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
+      let compressedSize = (base64Length * 3 / 4) / 1024;
+      
+      // If no target size or already below target, return
+      if (!targetSizeInKB || compressedSize <= targetSizeInKB) {
+        return dataUrl;
+      }
+      
+      // Create a temporary canvas for compression iterations
+      let tempCanvas = document.createElement("canvas");
+      let tempCtx = tempCanvas.getContext("2d");
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      tempCtx.drawImage(canvas, 0, 0);
+      
+      // Try reducing quality by manipulating the image data
+      let iteration = 0;
+      while (compressedSize > targetSizeInKB && iteration < maxIterations) {
+        // Reduce dimensions slightly (5% reduction per iteration)
+        const newWidth = Math.max(100, Math.floor(tempCanvas.width * 0.95));
+        const newHeight = Math.max(100, Math.floor(tempCanvas.height * 0.95));
+        
+        // Create a new canvas with reduced dimensions
+        const newCanvas = document.createElement("canvas");
+        newCanvas.width = newWidth;
+        newCanvas.height = newHeight;
+        const newCtx = newCanvas.getContext("2d");
+        
+        // Draw the image with reduced dimensions
+        newCtx.drawImage(tempCanvas, 0, 0, newWidth, newHeight);
+        
+        // Update tempCanvas for next iteration
+        tempCanvas = newCanvas;
+        
+        // Get new data URL and size
+        dataUrl = newCanvas.toDataURL("image/png");
+        base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
+        compressedSize = (base64Length * 3 / 4) / 1024;
+        
+        iteration++;
+      }
+      
+      return dataUrl;
+    }
+
+    // Main conversion function
     function convertAndCompress() {
       const file = selectedFile;
       const format = document.getElementById("format").value;
@@ -556,17 +627,31 @@
 
           let dataUrl;
           if (targetSizeInKB) {
-            let quality = 1.0;
-            let compressedSize;
-            do {
-              dataUrl = canvas.toDataURL("image/jpeg", quality);
-              const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
-              compressedSize = (base64Length * 3 / 4) / 1024;
-              quality -= 0.05;
-            } while (compressedSize > targetSizeInKB && quality > 0);
+            if (format === "jpeg" || format === "webp") {
+              let quality = 1.0;
+              let compressedSize;
+              do {
+                dataUrl = canvas.toDataURL(`image/${format}`, quality);
+                const base64Length = dataUrl.length - dataUrl.indexOf(",") - 1;
+                compressedSize = (base64Length * 3 / 4) / 1024;
+                quality -= 0.05;
+              } while (compressedSize > targetSizeInKB && quality > 0);
+            } else if (format === "png") {
+              // Use our PNG compression function
+              dataUrl = compressPNG(canvas, targetSizeInKB);
+            } else {
+              // For other formats, just convert without compression
+              dataUrl = canvas.toDataURL(`image/${format}`);
+            }
           } else {
             // Use original quality for the specified format
-            dataUrl = canvas.toDataURL(`image/${format === "jpeg" ? "jpeg" : "png"}`);
+            if (format === "png") {
+              dataUrl = canvas.toDataURL("image/png");
+            } else if (format === "jpeg") {
+              dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+            } else {
+              dataUrl = canvas.toDataURL(`image/${format}`);
+            }
           }
 
           if (format === "pdf") {
@@ -579,7 +664,11 @@
             setOutput(pdfDataUrl, "pdf", dataUrl);
           } else if (format === "jpeg") {
             setOutput(dataUrl, "jpeg", dataUrl);
-          } else if (format === "png" || format === "gif" || format === "bmp") {
+          } else if (format === "png") {
+            setOutput(dataUrl, "png", dataUrl);
+          } else if (format === "webp") {
+            setOutput(dataUrl, "webp", dataUrl);
+          } else if (format === "gif" || format === "bmp") {
             const tempImg = new Image();
             tempImg.src = dataUrl;
             tempImg.onload = function() {
@@ -588,12 +677,9 @@
               tempCanvas.height = height;
               const tempCtx = tempCanvas.getContext("2d");
               tempCtx.drawImage(tempImg, 0, 0);
-              const finalDataUrl = tempCanvas.toDataURL("image/png");
+              const finalDataUrl = tempCanvas.toDataURL(`image/${format}`);
               setOutput(finalDataUrl, format, finalDataUrl);
             };
-          } else if (format === "webp") {
-            const finalDataUrl = canvas.toDataURL("image/webp");
-            setOutput(finalDataUrl, "webp", finalDataUrl);
           }
         };
       };
